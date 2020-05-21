@@ -109,7 +109,7 @@ namespace Dapper.Tests
                 AddStructured(command, number_list);
             }
         }
-        
+
         private class IntCustomParam : SqlMapper.ICustomQueryParameter
         {
             private readonly IEnumerable<int> numbers;
@@ -197,8 +197,8 @@ namespace Dapper.Tests
         public void PassInEmptyIntArray()
         {
             Assert.Equal(
-                new int[0],
-                connection.Query<int>("select * from (select 1 as Id union all select 2 union all select 3) as X where Id in @Ids", new { Ids = new int[0] })
+                Array.Empty<int>(),
+                connection.Query<int>("select * from (select 1 as Id union all select 2 union all select 3) as X where Id in @Ids", new { Ids = Array.Empty<int>() })
             );
         }
 
@@ -564,7 +564,7 @@ namespace Dapper.Tests
 
             var table = new DataTable { TableName = "MyTVPType", Columns = { { "id", typeof(int) } }, Rows = { { 1 }, { 2 }, { 3 } } };
             table.SetTypeName(table.TableName); // per SO29533765
-            IDictionary<string, object> args = new Dictionary<string, object>
+            IDictionary<string, object> args = new Dictionary<string, object>(1)
             {
                 ["ids"] = table
             };
@@ -841,7 +841,7 @@ namespace Dapper.Tests
         [Fact]
         public void TestAppendingADictionary()
         {
-            var dictionary = new Dictionary<string, object>
+            var dictionary = new Dictionary<string, object>(2)
             {
                 ["A"] = 1,
                 ["B"] = "two"
@@ -891,7 +891,7 @@ namespace Dapper.Tests
         {
             var p = new DynamicParameters();
             var list = new int[] { 1, 2, 3 };
-            var args = new Dictionary<string, object> { ["ids"] = list };
+            var args = new Dictionary<string, object>(1) { ["ids"] = list };
             p.AddDynamicParams(args);
 
             var result = connection.Query<int>("select * from (select 1 A union all select 2 union all select 3) X where A in @ids", p).ToList();
@@ -1187,7 +1187,7 @@ insert @table values(5);
 insert @table values(6);
 insert @table values(7);
 SELECT value FROM @table WHERE value IN @myIds";
-            var queryParams = new Dictionary<string, object>
+            var queryParams = new Dictionary<string, object>(1)
             {
                 ["myIds"] = new[] { 5, 6 }
             };
@@ -1224,7 +1224,7 @@ SELECT value FROM @table WHERE value IN @myIds";
         [Fact]
         public void AllowIDictionaryParameters()
         {
-            var parameters = new Dictionary<string, object>
+            var parameters = new Dictionary<string, object>(1)
             {
                 ["param1"] = 0
             };
@@ -1442,10 +1442,10 @@ SELECT * FROM @Issue192 WHERE Field IN @µ AND Field_1 IN @µµ",
             Assert.Equal(42, result);
         }
 
-        [Fact]
+        [FactLongRunning]
         public void TestListExpansionPadding_Enabled() => TestListExpansionPadding(true);
 
-        [Fact]
+        [FactLongRunning]
         public void TestListExpansionPadding_Disabled() => TestListExpansionPadding(false);
 
         private void TestListExpansionPadding(bool enabled)
