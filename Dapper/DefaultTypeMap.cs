@@ -134,6 +134,12 @@ namespace Dapper
             var property = Properties.Find(p => string.Equals(p.Name, columnName, StringComparison.Ordinal))
                ?? Properties.Find(p => string.Equals(p.Name, columnName, StringComparison.OrdinalIgnoreCase));
 
+            if (property != null && MatchOnColumnAttributeIfPresent)
+            {
+                if(property.GetCustomAttributes(true).SingleOrDefault(attr => attr.GetType().Name == nameof(ColumnAttribute)) is ColumnAttribute colNameAttr)
+                    return new SimpleMemberMap(colNameAttr.Name, property);
+            }
+
             if (property == null && MatchNamesWithUnderscores)
             {
                 property = Properties.Find(p => string.Equals(p.Name, columnName.Replace("_", ""), StringComparison.Ordinal))
@@ -173,7 +179,10 @@ namespace Dapper
         /// Should column names like User_Id be allowed to match properties/fields like UserId ?
         /// </summary>
         public static bool MatchNamesWithUnderscores { get; set; }
-
+        /// <summary>
+        /// Match column names based on ColumnAttribute if present.
+        /// </summary>
+        public static bool MatchOnColumnAttributeIfPresent { get; set; }
         /// <summary>
         /// The settable properties for this typemap
         /// </summary>
